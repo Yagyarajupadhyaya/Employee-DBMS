@@ -1,36 +1,81 @@
 (async function () {
 
-    const data = await fetch("data.json");
-    const res = await data.json();
-    let employees = res;
+  const data = await fetch("data.json");
+  const res = await data.json();
+  let employees = res;
 
-    let selectedEmployeeId = employees[0]?.id;
-    let selectedEmployee = employees[0];
+  let selectedEmployeeId = employees[0]?.id;
+  let selectedEmployee = employees[0];
 
-    const employeeList = document.querySelector(".employees__names--list");
-    const employeeInfo = document.querySelector(".employees__single--info");
+  const employeeList = document.querySelector(".employees__names--list");
+  const employeeInfo = document.querySelector(".employees__single--info");
 
-    const createEmployee = document.querySelector(".createEmployee");
-    const addEmployeeModal = document.querySelector(".addEmployee");
-    const addEmployeeForm = document.querySelector(".addEmployee_create");
+  const createEmployee = document.querySelector(".createEmployee");
+  const addEmployeeModal = document.querySelector(".addEmployee");
+  const addEmployeeForm = document.querySelector(".addEmployee_create");
 
-    // show add employee modal
-    createEmployee.addEventListener("click", () => {
-        addEmployeeModal.style.display = "flex";
+  console.log("Employees from JSON:", employees);
+
+  //Render the employee list into the table
+  function renderEmployeeList() {
+    employeeList.innerHTML = "";
+    employees.forEach((emp) => {
+      const item = document.createElement("div");
+      item.className = "employees__names--item";
+      item.dataset.id = emp.id;
+
+      item.innerHTML = `
+        <span>${emp.firstName} ${emp.lastName}</span>
+        <span>${emp.salary}</span>
+      `;
+
+      item.addEventListener("click", () => {
+        selectedEmployeeId = emp.id;
+        selectedEmployee = emp;
+        renderEmployeeInfo();
+      });
+
+      employeeList.appendChild(item);
     });
+  }
 
-    // Close modal when clicking outside form
-    addEmployeeModal.addEventListener("click", (e) => {
-        if (e.target.className === "addEmployee") {
-            addEmployeeModal.style.display = "none";
-        }
-    });
+  function renderEmployeeInfo() {
+    if (!selectedEmployee) return;
 
-    // Restrict DOB input -> Minimum 18 years old
-    const dobInput = document.querySelector(".addEmployee_create--dob");
-    const today = new Date();
-    const year = today.getFullYear() - 18;
-    const monthDay = today.toISOString().slice(5, 10); // MM-DD
-    dobInput.max = `${year}-${monthDay}`;
+    employeeInfo.innerHTML = `
+      <h2 class="employees__single--heading">
+        ${selectedEmployee.firstName} ${selectedEmployee.lastName}
+      </h2>
+      <img src="${selectedEmployee.imageUrl || "https://via.placeholder.com/250"}" />
+      <p>Email: ${selectedEmployee.email}</p>
+      <p>Contact: ${selectedEmployee.contactNumber}</p>
+      <p>Salary: ${selectedEmployee.salary}</p>
+      <p>Address: ${selectedEmployee.address}</p>
+      <p>DOB: ${selectedEmployee.dob}</p>
+    `;
+  }
+
+  // show add employee modal
+  createEmployee.addEventListener("click", () => {
+    addEmployeeModal.style.display = "flex";
+  });
+
+  // Close modal when clicking outside form
+  addEmployeeModal.addEventListener("click", (e) => {
+    if (e.target.className === "addEmployee") {
+      addEmployeeModal.style.display = "none";
+    }
+  });
+
+  // Restrict DOB input -> Minimum 18 years old
+  const dobInput = document.querySelector(".addEmployee_create--dob");
+  const today = new Date();
+  const year = today.getFullYear() - 18;
+  const monthDay = today.toISOString().slice(5, 10);
+  dobInput.max = `${year}-${monthDay}`;
+
+  // INITIAL RENDER
+  renderEmployeeList();
+  renderEmployeeInfo();
 
 })();
