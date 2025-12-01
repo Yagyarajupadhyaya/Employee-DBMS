@@ -16,13 +16,18 @@
 
   console.log("Employees from JSON:", employees);
 
-  //Render the employee list into the table
+  //rendered the employees into the table
   function renderEmployeeList() {
     employeeList.innerHTML = "";
     employees.forEach((emp) => {
       const item = document.createElement("div");
       item.className = "employees__names--item";
       item.dataset.id = emp.id;
+
+      // highlight selected
+      if (emp.id === selectedEmployeeId) {
+        item.classList.add("selected");
+      }
 
       item.innerHTML = `
         <span>${emp.firstName} ${emp.lastName}</span>
@@ -32,6 +37,7 @@
       item.addEventListener("click", () => {
         selectedEmployeeId = emp.id;
         selectedEmployee = emp;
+        renderEmployeeList();  
         renderEmployeeInfo();
       });
 
@@ -40,7 +46,10 @@
   }
 
   function renderEmployeeInfo() {
-    if (!selectedEmployee) return;
+    if (!selectedEmployee) {
+      employeeInfo.innerHTML = "<p>No employee selected</p>";
+      return;
+    }
 
     employeeInfo.innerHTML = `
       <h2 class="employees__single--heading">
@@ -65,6 +74,35 @@
     if (e.target.className === "addEmployee") {
       addEmployeeModal.style.display = "none";
     }
+  });
+
+  // Handle form submit: add employee
+  addEmployeeForm.addEventListener("submit", (e) => {
+    e.preventDefault(); // stop refresh
+
+    const formData = new FormData(addEmployeeForm);
+
+    const newEmployee = {
+      id: Date.now(), // unique-ish id
+      firstName: formData.get("firstName"),
+      lastName: formData.get("lastName"),
+      imageUrl: formData.get("imageUrl"),
+      email: formData.get("email"),
+      contactNumber: formData.get("contactNumber"),
+      salary: formData.get("salary"),
+      address: formData.get("address"),
+      dob: formData.get("dob"),
+    };
+
+    employees.push(newEmployee);
+    selectedEmployeeId = newEmployee.id;
+    selectedEmployee = newEmployee;
+
+    renderEmployeeList();
+    renderEmployeeInfo();
+
+    addEmployeeForm.reset();
+    addEmployeeModal.style.display = "none";
   });
 
   // Restrict DOB input -> Minimum 18 years old
